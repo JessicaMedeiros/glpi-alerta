@@ -1,7 +1,8 @@
 const MySQLEvents = require("@rodrigogs/mysql-events");
-const mysqlConnection = require("../config/mysql-connection");
+const mysqlConnection = require("../config/dbconnections/mysql-connection");
+const webPushGLPI = require("../web-push/glpi/web-push.glpi");
 
-async function program() {
+async function startAndConnect() {
   const instance = new MySQLEvents(mysqlConnection, {
     startAtEnd: true, // to record only the new binary logs, if set to false or you didn'y provide it all the events will be console.logged after you start the app
   });
@@ -16,6 +17,8 @@ async function program() {
       console.log(e);
       var [{ after }] = e.affectedRows;
       console.log(after.name, after.content);
+      webPushGLPI.webPushGLPI(after);
+
     },
   });
 
@@ -23,4 +26,4 @@ async function program() {
   instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
 }
 
-module.exports = { program };
+module.exports = { startAndConnect };
